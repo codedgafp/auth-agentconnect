@@ -1,0 +1,27 @@
+https://github.com/france-connect/Documentation-AgentConnect/blob/main/doc-fs.md
+
+/* start - Ajout du css pour le bouton agent connect */
+#page-login-index .potentialidplist .potentialidp a {
+    height: 72px;
+    overflow: hidden;
+}
+#page-login-index .potentialidplist .potentialidp a img {
+    width: 230px;
+    height: 60px;
+}
+/* end - Ajout du css pour le bouton agent connect */
+
+Pour les tests, nous avons un compte générique
+Login : test
+Mdp : 123
+Pour les fournisseurs d'identités de démonstration, depuis la barre de recherche, il faut taper démonstration, plusieurs IDP sont disponibles.
+
+L’UID communiqué à AgentConnect par le FI lors de la cinématique permet de calculer le SUB agent qui sera transmis au FS.
+Nous avons fait le choix de ne pas intégrer l’email à la génération du SUB pour n’être pas impacté par le cas où l’agent change de mail, de nom ou de prénom.
+J’attire néanmoins votre attention sur le fait que le SUB transmis sera unique tant que l’agent se connecte avec le même FI.
+S’il utilise un autre FI, il faudra trouver une façon de faire la réconciliation d’identité.
+
+https://dev.to/robdwaller/how-to-create-a-json-web-token-using-php-3gml
+Le paramètre d'en-tête kid (ID clé) est un indice qui indique quelle clé a été utilisé pour sécuriser le JWS. Ce paramètre permet aux auteurs de signaler explicitement un changement de clé aux destinataires. La structure du kid valeur n'est pas spécifiée. Sa valeur DOIT être sensible à la casse chaîne. L'utilisation de ce paramètre d'en-tête est FACULTATIVE.
+
+Ce plugin a été réalisé à partir du plugin auth_dcrfpn, lui-même étant basé sur auth_oidc
