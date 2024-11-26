@@ -1,0 +1,11 @@
+stages:
+  - test-submodule
+  - trigger-mentor-plugins
+
+include:
+  - component: $CI_SERVER_FQDN/devops/cicd/gitlab-ci-toolkit/mentor-submodule-test@mentor
+    inputs:
+      submodule_branch: $CI_COMMIT_REF_NAME
+      submodule_path: "auth/agentconnect"
+      submodule_testsuite: "mentor_auth_agentconnect_testsuite"
+  - component: $CI_SERVER_FQDN/devops/cicd/gitlab-ci-toolkit/mentor-submodules-deploy@mentor
