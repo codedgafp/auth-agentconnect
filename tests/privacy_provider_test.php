@@ -39,7 +39,7 @@ class auth_agentconnect_privacy_testcase extends \core_privacy\tests\provider_te
     /**
      * Tests set up.
      */
-    public function setUp() {
+    public function setUp(): void {
         global $CFG;
         $this->resetAfterTest();
         $this->setAdminUser();
