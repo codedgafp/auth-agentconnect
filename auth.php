@@ -21,6 +21,8 @@
  * @copyright (C) 2014 onwards Microsoft, Inc. (http://microsoft.com/)
  */
 
+use auth_agentconnect\utils;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/authlib.php');
@@ -277,32 +279,53 @@ class auth_plugin_agentconnect extends \auth_plugin_base {
     }
 
     /**
-     * Log out user from Microsoft 365 if single sign off integration is enabled.
+     * Pre logout hook.
      *
-     * @param stdClass $user
-     *
-     * @return bool
+     * @global object
      */
-    public function postlogout_hook($user) {
-        global $CFG;
+    function prelogout_hook() {
+        global $DB, $USER;
 
         $singlesignoutsetting = get_config('auth_agentconnect', 'single_sign_off');
-
-        if ($singlesignoutsetting) {
-            $logouturl = get_config('auth_agentconnect', 'logouturi');
-            if (!$logouturl) {
-                $logouturl = 'https://login.microsoftonline.com/common/oauth2/logout?post_logout_redirect_uri=' .
-                    urlencode($CFG->wwwroot);
-            } else {
-                if (preg_match("/^https:\/\/login.microsoftonline.com\//", $logouturl) &&
-                    preg_match("/\/oauth2\/logout$/", $logouturl)) {
-                    $logouturl .= '?post_logout_redirect_uri=' . urlencode($CFG->wwwroot);
-                }
-            }
-
-            redirect($logouturl);
+        if (!is_enabled_auth('agentconnect') || $USER->auth != 'agentconnect' || !$singlesignoutsetting) {
+            return;
         }
 
-        return true;
+        // Check if we received a state.
+        $state = optional_param('state', null, PARAM_ALPHANUM);
+        if (!empty($state)) {
+            // Validate and expire state.
+            $staterec = $DB->get_record('auth_agentconnect_state', ['state' => $state]);
+            if (empty($staterec)) {
+                throw new \moodle_exception('errorauthunknownstate', 'auth_agentconnect');
+            }
+            $DB->delete_records('auth_agentconnect_state', ['id' => $staterec->id]);
+
+            // Delete token data.
+            $DB->delete_records('auth_agentconnect_token', ['userid' => $USER->id]);
+            $eventdata = ['objectid' => $USER->id, 'userid' => $USER->id];
+            $event = \auth_agentconnect\event\user_disconnected::create($eventdata);
+            $event->trigger();
+
+            utils::debug_log(__FILE__, __LINE__, __FUNCTION__, [
+                    'event'     => 'user_disconnected',
+                    'eventdata' => $eventdata
+            ]);
+        } else {
+            // Disconnect from ProConnect.
+            $client = $this->loginflow->get_oidcclient();
+            $tokenrec = $DB->get_record('auth_agentconnect_token', ['username' => $USER->username]);
+            $nonce = 'N'.uniqid();
+            $stateparams = [];
+            $logouturl = new moodle_url('/login/logout.php', ['sesskey' => sesskey()]);
+            $params = [
+                    'id_token_hint' => $tokenrec->idtoken,
+                    'state' => $client->getnewstate($nonce, $stateparams),
+                    'post_logout_redirect_uri' => urlencode($logouturl->out())
+            ];
+
+            $redirecturl = new \moodle_url($client->get_endpoint('end_session_endpoint'), $params);
+            redirect($redirecturl);
+        }
     }
 }
