@@ -580,8 +580,10 @@ class authcode extends base {
             ]);
             $email       = $idtoken->claim('email');
             if ($matchemail) {
-                $username    = $DB->get_field('user', 'username', ['email' => $email, 'deleted' => 0, 'suspended' => 0]);
-                $username    = $username ? $username : $email;
+                $sqllike = $DB->sql_like('email', ':email', false);
+                $username = $DB->get_field_select('user', 'username',
+                        "$sqllike AND deleted = 0 AND suspended = 0", ['email' => $email]);
+                $username = $username ? $username : $email;
                 $originalupn = $username;
 
                 utils::debug_log(__FILE__, __LINE__, __FUNCTION__, [
