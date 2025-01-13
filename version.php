@@ -23,7 +23,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2022121201;
+$plugin->version = 2025011300;
 $plugin->requires = 2020061500;
 $plugin->release = '3.9.7';
 $plugin->component = 'auth_agentconnect';
