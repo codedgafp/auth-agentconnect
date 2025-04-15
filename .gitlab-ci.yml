@@ -1,11 +1,13 @@
 stages:
   - test-submodule
   - trigger-mentor-plugins
+  - reverse-mentor-plugin-github
 
 include:
-  - component: $CI_SERVER_FQDN/devops/cicd/gitlab-ci-toolkit/mentor-submodule-test@1.12.5
+  - component: $CI_SERVER_FQDN/mentor/mentor-modules/ci/mentor-modules-ci/mentor-submodule-test@1.0.0
     inputs:
       submodule_branch: $CI_COMMIT_REF_NAME
       submodule_path: "auth/agentconnect"
       submodule_testsuite: "mentor_auth_agentconnect_testsuite"
-  - component: $CI_SERVER_FQDN/devops/cicd/gitlab-ci-toolkit/mentor-submodules-deploy@1.12.5
+  - component: $CI_SERVER_FQDN/mentor/mentor-modules/ci/mentor-modules-ci/mentor-submodules-deploy@1.0.0
+  - component: $CI_SERVER_FQDN/mentor/mentor-modules/ci/mentor-modules-ci/mentor-submodules-reverse-github@1.0.0
