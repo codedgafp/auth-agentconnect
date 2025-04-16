@@ -198,7 +198,7 @@ class oidcclient {
      * @param string $nonce The generated nonce value.
      * @return string The new state value.
      */
-    protected function getnewstate($nonce, array $stateparams = array()) {
+    public function getnewstate($nonce, array $stateparams = array()) {
         global $DB;
         $staterec = new \stdClass;
         $staterec->sesskey = sesskey();

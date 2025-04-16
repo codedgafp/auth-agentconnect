@@ -720,4 +720,25 @@ class authcode extends base {
             return true;
         }
     }
+
+    /**
+     * Get session end URL with params.
+     *
+     * @param $username
+     * @param $idtoken
+     * @return \moodle_url
+     */
+    public function get_session_end_url($idtoken) {
+        $client = $this->get_oidcclient();
+        $logouturl = new \moodle_url('/login/logout.php', ['sesskey' => sesskey()]);
+        $params = [
+                'id_token_hint' => $idtoken,
+                'state' => $client->getnewstate('N'.uniqid()),
+                'post_logout_redirect_uri' => urlencode($logouturl->out())
+        ];
+        $logouturi = get_config('auth_agentconnect', 'logouturi');
+        $redirecturl = new \moodle_url($logouturi, $params);
+        return $redirecturl;
+    }
+
 }

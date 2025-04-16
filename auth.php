@@ -287,7 +287,7 @@ class auth_plugin_agentconnect extends \auth_plugin_base {
         global $DB, $USER;
 
         $singlesignoutsetting = get_config('auth_agentconnect', 'single_sign_off');
-        if (!is_enabled_auth('agentconnect') || $USER->auth != 'agentconnect' || !$singlesignoutsetting) {
+        if (!is_enabled_auth('agentconnect') || !$singlesignoutsetting) {
             return;
         }
 
@@ -313,18 +313,11 @@ class auth_plugin_agentconnect extends \auth_plugin_base {
             ]);
         } else {
             // Disconnect from ProConnect.
-            $client = $this->loginflow->get_oidcclient();
             $tokenrec = $DB->get_record('auth_agentconnect_token', ['username' => $USER->username]);
-            $nonce = 'N'.uniqid();
-            $stateparams = [];
-            $logouturl = new moodle_url('/login/logout.php', ['sesskey' => sesskey()]);
-            $params = [
-                    'id_token_hint' => $tokenrec->idtoken,
-                    'state' => $client->getnewstate($nonce, $stateparams),
-                    'post_logout_redirect_uri' => urlencode($logouturl->out())
-            ];
-
-            $redirecturl = new \moodle_url($client->get_endpoint('end_session_endpoint'), $params);
+            if (!$tokenrec) {
+                return;
+            }
+            $redirecturl = $this->loginflow->get_session_end_url($tokenrec->idtoken);
             redirect($redirecturl);
         }
     }
