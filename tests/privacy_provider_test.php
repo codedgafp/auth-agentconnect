@@ -26,6 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 use \auth_agentconnect\privacy\provider;
+use auth_agentconnect\helper\testhelper;
 
 /**
  * Privacy test for auth_agentconnect
@@ -71,6 +72,8 @@ class auth_agentconnect_privacy_testcase extends \core_privacy\tests\provider_te
     public function test_get_users_in_context() {
         $this->resetAfterTest();
 
+        testhelper::create_default_entity($this);
+
         $component = 'auth_agentconnect';
         // Create a user.
         $user = $this->getDataGenerator()->create_user();
@@ -102,6 +105,8 @@ class auth_agentconnect_privacy_testcase extends \core_privacy\tests\provider_te
      * Test that user data is exported correctly.
      */
     public function test_export_user_data() {
+        $this->resetAfterTest();
+        testhelper::create_default_entity($this);
         // Create a user record.
         $user = $this->getDataGenerator()->create_user();
         $tokenrecord = self::create_token($user->id);
@@ -135,7 +140,9 @@ class auth_agentconnect_privacy_testcase extends \core_privacy\tests\provider_te
      */
     public function test_delete_data_for_all_users_in_context() {
         global $DB;
-
+        $this->resetAfterTest();
+        
+        testhelper::create_default_entity($this);
         // Create a user record.
         $user1 = $this->getDataGenerator()->create_user();
         self::create_token($user1->id);
@@ -167,6 +174,7 @@ class auth_agentconnect_privacy_testcase extends \core_privacy\tests\provider_te
     public function test_delete_data_for_user() {
         global $DB;
 
+        testhelper::create_default_entity($this);
         // Create a user record.
         $user1 = $this->getDataGenerator()->create_user();
         self::create_token($user1->id);
@@ -197,8 +205,8 @@ class auth_agentconnect_privacy_testcase extends \core_privacy\tests\provider_te
      * Test that data for users in approved userlist is deleted.
      */
     public function test_delete_data_for_users() {
-        $this->resetAfterTest();
-
+        testhelper::create_default_entity($this);
+        
         $component = 'auth_agentconnect';
         // Create user1.
         $user1 = $this->getDataGenerator()->create_user();
